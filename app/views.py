@@ -4,13 +4,16 @@ Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
 Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
-
+import os
 from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session, abort
+
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
-from app.models import UserProfile
+from app.forms import LoginForm, ProfileForm
+from app.models import UserProfile, Profile
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
+from datetime import datetime
 
 
 ###
@@ -33,6 +36,58 @@ def secure_page():
 def about():
     """Render the website's about page."""
     return render_template('about.html')
+
+@app.route('/userprofile', methods=["POST", "GET"])
+def userprofile():
+    """render individual profile"""
+
+    if request.args.get('submit'):
+        filterVar = request.args.get('submit')
+        profile = Profile.query.filter_by(id=filterVar).first()
+    
+        return render_template('individual_profile.html', profile=profile)
+    pro = request.args.get('delete')
+    profile = Profile.query.get(pro)
+    db.session.delete(profile)
+    db.session.commit()
+    profiles = Profile.query.all()
+    return render_template('profiles.html', profiles=profiles)
+    
+
+@app.route('/profiles/')
+def profiles():
+    """Render the profiles page."""
+    
+    profiles = Profile.query.all()
+    return render_template('profiles.html', profiles=profiles)
+
+@app.route('/profile', methods=["POST", "GET"])
+def profile():
+    """Render the website's profile page to add a profile."""
+    form = ProfileForm()
+    if request.method == "POST" and form.validate_on_submit():
+        firstname = form.firstname.data
+        lastname = form.lastname.data
+        gender = form.gender.data
+        email = form.email.data
+        location = form.location.data
+        biography = form.biography.data
+        photo = form.photo.data
+        date = datetime.today().strftime('%B %d, %Y')
+
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(
+            app.config['UPLOAD_FOLDER'], filename
+        ))
+        
+        profile = Profile(first_name=firstname,last_name=lastname, gender=gender, email=email, location=location, biography=biography, photo=filename, date=date)
+        db.session.add(profile)
+        db.session.commit()
+        flash('Profile Successfully added.', 'success')
+        profiles = Profile.query.all()
+        return render_template('profiles.html', profiles=profiles)
+    
+    return render_template('profile.html', form=form) 
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -86,7 +141,14 @@ def load_user(id):
 ###
 # The functions below should be applicable to all Flask apps.
 ###
-
+# Flash errors from the form if validation fails
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'danger')
 
 @app.route('/<file_name>.txt')
 def send_text_file(file_name):

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block main %}
+<br>
+<div>
+    <div class="wrapper"> 
+        <div class="a2"> <img src="{{ url_for('static', filename= "uploads/")}}{{profile.photo}}" class="pimage"/> </div>
+        <div class="b2"> {{ profile.first_name }} {{ profile.last_name }}</div>
+        <div class="c2"> <i class="fa fa-envelope"></i></div>
+        <div class="d2"> <i class="fa fa-map-marker"></i></div>
+        <div class="e2"> <i class="fa fa-calendar"></i></div>
+        <div class="f2"> {{ profile.email }} </div>
+        <div class="g2"> {{ profile.location }} </div>
+        <div class="hh2"> Joined on {{ profile.date }} </div>
+        <br>
+        <div class="i2">About me</div>
+        <div class="j2"> {{ profile.biography }} </div>
+        <br>
+        <div class="k2"><button class="btn btn-primary btn-block">Send Message</button></div>
+        <div class="l2"><button class="btn btn-primary btn-block">Follow</button></div>
+        
+    </div>
+    <br>
+    
+</div>
+{% endblock %}

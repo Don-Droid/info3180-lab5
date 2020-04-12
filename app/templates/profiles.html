@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block main %}
+    <h1>Profiles</h1>
+    {% include 'flash_messages.html' %}
+    <div class="profiles">
+               
+        {% if profiles %}
+            {% for profile in profiles %}
+            <form action="{{ url_for('userprofile') }}" method="get" class="form-data" enctype="multipart/form-data"> 
+                <div class="wrapper">
+                    <div class="a"> <img src="{{ url_for('static', filename= "uploads/")}}{{profile.photo}}" class="pimage"/> </div> 
+                    <div class="b"> {{ profile.first_name }} {{ profile.last_name }}</div>
+                    <div class="c"> <i class="fa fa-user"></i></div>
+                    <div class="d"> {{ profile.gender }} </div>
+                    <div class="e"> <i class="fa fa-map-marker"></i></div>
+                    <div class="f"> {{ profile.location }} </div>
+                    <div class="g"> <button type="submit" name="submit" value="{{ profile.id }}" class="btn btn-primary btn-block">View Profile</button></div>
+                    <div class="h"> <button type="submit" name="delete" value="{{ profile.id }}" class="btn btn-primary btn-block" >Delete Profile</button></div>
+                </div>
+            </form>
+                <br>    
+            {% endfor %} 
+        {% else %}
+            <p>There are no Profiles currently.</p>
+        {% endif %}
+    </div>
+{% endblock %}
